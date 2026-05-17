@@ -1,0 +1,6 @@
+{
+  "name": "PrepAI",
+  "description": "AI-Powered Interview Preparation Platform for students and job seekers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
