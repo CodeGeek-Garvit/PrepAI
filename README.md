@@ -55,12 +55,5 @@ The application is structured to be easily deployable:
 
 PrepAI follows a full-stack architecture where the Express server acts as both the API provider and the static file server in production. Gemini AI calls are handled securely on the server side to protect API keys.
 
-```text
-Frontend (React) <---> Backend (Express) <---> MongoDB
-                          |
-                          v
-                      Gemini AI
-```
 
----
-Built with ❤️ by the PrepAI Team.
+
