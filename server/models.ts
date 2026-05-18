@@ -52,3 +52,18 @@ const interviewSessionSchema = new mongoose.Schema({
 });
 
 export const InterviewSession = mongoose.model('InterviewSession', interviewSessionSchema);
+
+const jdMatchSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  uploadedResumeName: String,
+  jobTitle: String,
+  matchScore: Number,
+  matchingSkills: [String],
+  missingSkills: [String],
+  atsKeywords: [String],
+  suggestions: [String],
+  hiringProbability: String,
+  createdAt: { type: Date, default: Date.now },
+});
+
+export const JDMatch = mongoose.model('JDMatch', jdMatchSchema);

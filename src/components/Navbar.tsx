@@ -17,6 +17,7 @@ const Navbar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Resume AI', path: '/resume', icon: FileText },
+    { name: 'JD Matcher', path: '/jd-match', icon: Briefcase },
     { name: 'Mock Interview', path: '/interview', icon: Code2 },
   ];
 

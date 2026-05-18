@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { ResumeAnalysis, InterviewSession } from '../models.ts';
+import { ResumeAnalysis, InterviewSession, JDMatch } from '../models.ts';
 import { authMiddleware, AuthRequest } from '../middleware/auth.ts';
 
 const router = express.Router();
@@ -13,6 +13,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     const latestResume = await ResumeAnalysis.findOne({ userId }).sort({ createdAt: -1 });
     const latestInterviews = await InterviewSession.find({ userId }).sort({ createdAt: -1 }).limit(5);
     const resumeHistory = await ResumeAnalysis.find({ userId }).sort({ createdAt: -1 }).limit(10);
+    const jdMatches = await JDMatch.find({ userId }).sort({ createdAt: -1 }).limit(5);
     const scoreTrend = await ResumeAnalysis.find({ userId })
       .sort({ createdAt: 1 })
       .select('atsScore createdAt')
@@ -26,16 +27,19 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 
     const totalInterviews = await InterviewSession.countDocuments({ userId });
     const totalResumes = await ResumeAnalysis.countDocuments({ userId });
+    const totalJDMatches = await JDMatch.countDocuments({ userId });
 
     res.json({
       latestResume,
       latestInterviews,
       resumeHistory,
+      jdMatches,
       scoreTrend,
       stats: {
         avgAts: Math.round(averageAtsScore[0]?.avg || 0),
         totalInterviews,
-        totalResumes
+        totalResumes,
+        totalJDMatches
       }
     });
   } catch (error) {

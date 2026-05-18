@@ -7,6 +7,7 @@ import Signup from './pages/Signup.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import ResumeUpload from './pages/ResumeUpload.tsx';
 import InterviewPrep from './pages/InterviewPrep.tsx';
+import JDMatcher from './pages/JDMatcher.tsx';
 import Layout from './components/Layout.tsx';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/resume" element={<ResumeUpload />} />
             <Route path="/interview" element={<InterviewPrep />} />
+            <Route path="/jd-match" element={<JDMatcher />} />
           </Route>
         </Routes>
       </BrowserRouter>

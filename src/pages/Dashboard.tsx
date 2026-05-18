@@ -15,7 +15,8 @@ import {
   X,
   Award,
   AlertTriangle,
-  Lightbulb
+  Lightbulb,
+  Target
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -27,6 +28,12 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 const Dashboard = () => {
   const [data, setData] = useState<any>(null);
@@ -61,8 +68,8 @@ const Dashboard = () => {
 
   const stats = [
     { label: 'Avg ATS Score', value: `${data?.stats?.avgAts || 0}%`, icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Interviews Completed', value: data?.stats?.totalInterviews || 0, icon: MessageSquare, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Resumes Analyzed', value: data?.stats?.totalResumes || 0, icon: FileText, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Interviews Prep', value: data?.stats?.totalInterviews || 0, icon: MessageSquare, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'JD Matches', value: data?.stats?.totalJDMatches || 0, icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
   const chartData = data?.scoreTrend?.map((item: any) => ({
@@ -217,6 +224,34 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+                {data.jdMatches?.map((match: any, i: number) => (
+                  <div key={`jd-${i}`} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                        <Briefcase className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Job Match: {match.jobTitle}</p>
+                        <p className="text-sm text-gray-500">{match.uploadedResumeName} • {new Date(match.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-right">
+                        <span className={cn(
+                          "text-lg font-bold",
+                          match.matchScore > 80 ? "text-green-600" : match.matchScore > 60 ? "text-yellow-600" : "text-red-500"
+                        )}>{match.matchScore}%</span>
+                        <span className="text-[10px] text-gray-400 block uppercase tracking-wider font-bold text-right">MATCH</span>
+                      </div>
+                      <button 
+                        onClick={() => setSelectedResult({ type: 'jdMatch', data: match })}
+                        className="text-indigo-600 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                      >
+                        Details <ArrowUpRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
                 {data.latestInterviews.map((int: any, i: number) => (
                   <div key={`int-${i}`} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors group">
                     <div className="flex items-center gap-4">
@@ -313,6 +348,8 @@ const Dashboard = () => {
               <div className="p-8">
                 {selectedResult.type === 'resume' ? (
                   <ResumeResultView analysis={selectedResult.data} />
+                ) : selectedResult.type === 'jdMatch' ? (
+                  <JDMatchResultView match={selectedResult.data} />
                 ) : (
                   <InterviewResultView session={selectedResult.data} />
                 )}
@@ -346,6 +383,44 @@ const ResumeResultView = ({ analysis }: { analysis: any }) => {
         <SectionItem icon={AlertTriangle} title="Areas for Improvement" color="red" items={resAnalysis.weaknesses} />
         <SectionItem icon={TrendingUp} title="Recommended Skills" color="indigo" items={resAnalysis.missingSkills} />
         <SectionItem icon={Lightbulb} title="Format & Impact Tips" color="yellow" items={resAnalysis.improvementSuggestions} />
+      </div>
+    </div>
+  );
+};
+
+const JDMatchResultView = ({ match }: { match: any }) => {
+  const { matchScore, matchingSkills, missingSkills, atsKeywords, suggestions, hiringProbability, jobTitle, uploadedResumeName } = match;
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between pb-6 border-b border-gray-50">
+        <div>
+          <p className="text-sm font-bold text-indigo-600 mb-1 uppercase tracking-wider">Job Match Analysis</p>
+          <h4 className="text-xl font-bold text-gray-900">{jobTitle}</h4>
+          <p className="text-xs text-gray-400 mt-1 uppercase font-bold tracking-widest">Resume: {uploadedResumeName}</p>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className={cn(
+            "text-4xl font-black leading-none",
+            matchScore > 80 ? "text-green-600" : matchScore > 60 ? "text-yellow-600" : "text-red-500"
+          )}>{matchScore}<span className="text-lg">%</span></span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase mt-1">Match Score</span>
+        </div>
+      </div>
+
+      <div className="p-4 bg-gray-50 rounded-2xl flex items-center justify-between">
+        <span className="text-sm font-bold text-gray-600">Hiring Probability</span>
+        <span className={cn(
+           "px-3 py-1 rounded-lg text-sm font-black uppercase tracking-wider",
+           hiringProbability === 'High' ? "bg-green-100 text-green-700" : hiringProbability === 'Medium' ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+        )}>{hiringProbability}</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <SectionItem icon={Award} title="Matching Skills" color="green" items={matchingSkills} />
+        <SectionItem icon={AlertTriangle} title="Missing Requirements" color="red" items={missingSkills} />
+        <SectionItem icon={Target} title="Keywords for ATS" color="indigo" items={atsKeywords} />
+        <SectionItem icon={Lightbulb} title="Success Suggestions" color="yellow" items={suggestions} />
       </div>
     </div>
   );
