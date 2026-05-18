@@ -4,6 +4,7 @@ import resumeRoutes from './routes/resume.ts';
 import interviewRoutes from './routes/interview.ts';
 import dashboardRoutes from './routes/dashboard.ts';
 import jdMatchRoutes from './routes/jdMatch.ts';
+import debugRoutes from './routes/debug.ts';
 
 export function registerRoutes(app: Express) {
   app.use('/api/auth', authRoutes);
@@ -11,4 +12,5 @@ export function registerRoutes(app: Express) {
   app.use('/api/interview', interviewRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/jd-match', jdMatchRoutes);
+  app.use('/api/debug', debugRoutes);
 }

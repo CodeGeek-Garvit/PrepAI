@@ -54,6 +54,7 @@ const ResumeUpload = () => {
       });
       setAnalysis(data);
     } catch (err: any) {
+      console.error('[Frontend] Resume analysis error:', err);
       const msg = err.response?.data?.message || 'Failed to analyze resume. Please try again.';
       const details = err.response?.data?.details ? ` (${err.response.data.details})` : '';
       setError(`${msg}${details}`);

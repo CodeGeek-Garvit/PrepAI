@@ -47,8 +47,17 @@ router.post('/analyze', authMiddleware, upload.single('resume'), async (req: any
 
     // 2. AI Analysis
     console.log('[JD Match] Requesting Gemini AI Comparison...');
-    const analysis = await matchResumeWithJD(resumeText, jobDescription);
-    console.log('[JD Match] Comparison completed. Score:', analysis.matchScore);
+    let analysis;
+    try {
+      analysis = await matchResumeWithJD(resumeText, jobDescription);
+      console.log('[JD Match] Comparison completed. Score:', analysis.matchScore);
+    } catch (aiError: any) {
+      console.error('[JD Match] Gemini Analysis failed critically:', aiError.message);
+      return res.status(503).json({
+        message: 'AI Comparison service is temporarily unavailable.',
+        details: aiError.message === 'GEMINI_API_KEY_MISSING' ? 'Server API Key is not configured.' : aiError.message
+      });
+    }
 
     // 3. Save to DB
     const newMatch = new JDMatch({

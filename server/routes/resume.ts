@@ -51,8 +51,17 @@ router.post('/upload', authMiddleware, upload.single('resume'), async (req: any,
 
     // AI Analysis
     console.log('[Upload] Requesting Gemini AI Analysis...');
-    const analysis = await analyzeResume(resumeText);
-    console.log('[Upload] Gemini Analysis completed (Score: ' + analysis.atsScore + ')');
+    let analysis;
+    try {
+      analysis = await analyzeResume(resumeText);
+      console.log('[Upload] Gemini Analysis completed (Score: ' + analysis.atsScore + ')');
+    } catch (aiError: any) {
+      console.error('[Upload] Gemini Analysis failed critically:', aiError.message);
+      return res.status(503).json({
+        message: 'AI Analysis service is temporarily unavailable.',
+        details: aiError.message === 'GEMINI_API_KEY_MISSING' ? 'Server API Key is not configured.' : aiError.message
+      });
+    }
 
     // Save to DB
     console.log('[Upload] Saving analysis to MongoDB...');

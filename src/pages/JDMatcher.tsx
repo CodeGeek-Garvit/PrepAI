@@ -62,8 +62,10 @@ const JDMatcher = () => {
       });
       setResult(data);
     } catch (err: any) {
+      console.error('[Frontend] JD Match analysis error:', err);
       const msg = err.response?.data?.message || 'Comparison failed. Please try again.';
-      setError(msg);
+      const details = err.response?.data?.details ? ` (${err.response.data.details})` : '';
+      setError(`${msg}${details}`);
     } finally {
       setLoading(false);
     }
