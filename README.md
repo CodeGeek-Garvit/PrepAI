@@ -1,6 +1,15 @@
+## 🎯 Problem Statement
+
+Many students struggle with resume optimization and interview preparation due to lack of personalized guidance. PrepAI bridges this gap using AI-powered analysis and interview simulations.
+
 # PrepAI — AI-Powered Interview Preparation Platform
 
 PrepAI is an intelligent web application designed to help students and job seekers master their interview skills. By leveraging the power of Gemini AI, PrepAI provides personalized resume feedback, ATS scoring, and realistic mock interview simulations with qualitative evaluations.
+
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Node](https://img.shields.io/badge/Backend-Node.js-green)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB-brightgreen)
+![Gemini AI](https://img.shields.io/badge/AI-Gemini-orange)
 
 ## 🚀 Features
 
@@ -44,6 +53,16 @@ PrepAI is an intelligent web application designed to help students and job seeke
    npm run dev
    ```
 
+   ## 📂 Project Structure
+
+/client
+/server
+/models
+/routes
+/services
+/components
+/pages
+
 ## 📜 Deployment
 
 The application is structured to be easily deployable:
@@ -54,6 +73,14 @@ The application is structured to be easily deployable:
 ## 🏗 Architecture Overview
 
 PrepAI follows a full-stack architecture where the Express server acts as both the API provider and the static file server in production. Gemini AI calls are handled securely on the server side to protect API keys.
+
+
+## 🚀 Future Improvements
+
+- Resume vs Job Description matching
+- Company-specific interview simulations
+- Voice-based mock interviews
+- AI career roadmap generation
 
 
 
