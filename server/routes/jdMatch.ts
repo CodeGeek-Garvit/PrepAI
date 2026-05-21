@@ -50,7 +50,11 @@ router.post('/analyze', authMiddleware, upload.single('resume'), async (req: any
     let analysis;
     try {
       analysis = await matchResumeWithJD(resumeText, jobDescription);
-      console.log('[JD Match] Comparison completed. Score:', analysis.matchScore);
+      if (analysis.isFallback) {
+        console.warn(`[JD Match] Gemini Match returned fallback data. Reason: ${analysis.fallbackReason || 'Unknown'}`);
+      } else {
+        console.log('[JD Match] Comparison completed. Score:', analysis.matchScore);
+      }
     } catch (aiError: any) {
       console.error('[JD Match] Gemini Analysis failed critically:', aiError.message);
       return res.status(503).json({
@@ -60,6 +64,7 @@ router.post('/analyze', authMiddleware, upload.single('resume'), async (req: any
     }
 
     // 3. Save to DB
+    console.log('[JD Match] Saving results to MongoDB...');
     const newMatch = new JDMatch({
       userId,
       uploadedResumeName: req.file.originalname,
@@ -70,10 +75,17 @@ router.post('/analyze', authMiddleware, upload.single('resume'), async (req: any
       atsKeywords: analysis.atsKeywords || [],
       suggestions: analysis.suggestions || [],
       hiringProbability: analysis.hiringProbability || 'Medium',
+      isFallback: analysis.isFallback || false,
+      fallbackReason: analysis.fallbackReason || null,
     });
 
-    await newMatch.save();
-    console.log('[JD Match] Success - Saved with ID:', newMatch._id);
+    try {
+      await newMatch.save();
+      console.log('[JD Match] Success - Saved with ID:', newMatch._id);
+    } catch (dbError: any) {
+      console.error('[JD Match] Database save failed:', dbError.message);
+      throw dbError;
+    }
 
     res.status(201).json(newMatch);
   } catch (error: any) {

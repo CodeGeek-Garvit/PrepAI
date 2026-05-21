@@ -66,7 +66,7 @@ const ResumeUpload = () => {
   const renderAnalysis = () => {
     if (!analysis) return null;
 
-    const { atsScore, analysis: resAnalysis } = analysis;
+    const { atsScore, analysis: resAnalysis, isFallback } = analysis;
 
     return (
       <motion.div
@@ -74,6 +74,16 @@ const ResumeUpload = () => {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-8"
       >
+        {isFallback && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-2xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600" />
+            <div className="text-sm">
+              <p className="font-bold">AI Service Busy</p>
+              <p className="opacity-80">We're using an intelligent fallback engine to provide immediate feedback while the main AI recovers.</p>
+            </div>
+          </div>
+        )}
+
         {/* ATS Score Header */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1">

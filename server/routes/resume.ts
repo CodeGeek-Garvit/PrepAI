@@ -54,7 +54,11 @@ router.post('/upload', authMiddleware, upload.single('resume'), async (req: any,
     let analysis;
     try {
       analysis = await analyzeResume(resumeText);
-      console.log('[Upload] Gemini Analysis completed (Score: ' + analysis.atsScore + ')');
+      if (analysis.isFallback) {
+        console.warn(`[Upload] Gemini Analysis returned fallback data. Reason: ${analysis.fallbackReason}`);
+      } else {
+        console.log('[Upload] Gemini Analysis completed (Score: ' + analysis.atsScore + ')');
+      }
     } catch (aiError: any) {
       console.error('[Upload] Gemini Analysis failed critically:', aiError.message);
       return res.status(503).json({
@@ -70,6 +74,8 @@ router.post('/upload', authMiddleware, upload.single('resume'), async (req: any,
       filename: req.file.originalname,
       resumeText,
       atsScore: analysis.atsScore,
+      isFallback: analysis.isFallback || false,
+      fallbackReason: analysis.fallbackReason || null,
       analysis: {
         strengths: analysis.strengths || [],
         weaknesses: analysis.weaknesses || [],
@@ -79,8 +85,13 @@ router.post('/upload', authMiddleware, upload.single('resume'), async (req: any,
       }
     });
 
-    await newAnalysis.save();
-    console.log('[Upload] Success - Analysis saved. ID:', newAnalysis._id);
+    try {
+      await newAnalysis.save();
+      console.log('[Upload] Success - Analysis saved. ID:', newAnalysis._id);
+    } catch (dbError: any) {
+      console.error('[Upload] Database save failed:', dbError.message);
+      throw dbError;
+    }
 
     res.status(201).json(newAnalysis);
   } catch (error: any) {

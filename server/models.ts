@@ -21,6 +21,8 @@ const resumeAnalysisSchema = new mongoose.Schema({
     formattingRecommendations: [String],
     improvementSuggestions: [String]
   },
+  isFallback: { type: Boolean, default: false },
+  fallbackReason: String,
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -48,6 +50,9 @@ const interviewSessionSchema = new mongoose.Schema({
       confidenceScore: Number
     }
   }],
+  company: { type: String, default: null },
+  isCompanySpecific: { type: Boolean, default: false },
+  overallScore: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -63,6 +68,8 @@ const jdMatchSchema = new mongoose.Schema({
   atsKeywords: [String],
   suggestions: [String],
   hiringProbability: String,
+  isFallback: { type: Boolean, default: false },
+  fallbackReason: String,
   createdAt: { type: Date, default: Date.now },
 });
 

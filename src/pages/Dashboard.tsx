@@ -186,7 +186,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Latest Results */}
         <div className="lg:col-span-2 space-y-6">
@@ -197,7 +196,7 @@ const Dashboard = () => {
           </div>
 
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            {data?.latestInterviews?.length > 0 || data?.resumeHistory?.length > 0 ? (
+            {data?.latestInterviews?.length > 0 || data?.resumeHistory?.length > 0 || data?.jdMatches?.length > 0 ? (
               <div className="divide-y divide-gray-50">
                 {data.resumeHistory.map((res: any, i: number) => (
                   <div key={`res-${i}`} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors group">
@@ -255,27 +254,48 @@ const Dashboard = () => {
                 {data.latestInterviews.map((int: any, i: number) => (
                   <div key={`int-${i}`} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors group">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                        <MessageSquare className="w-5 h-5" />
-                      </div>
+                      {int.isCompanySpecific ? (
+                        <CompanyLogoBadge company={int.company} size="sm" />
+                      ) : (
+                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                          <MessageSquare className="w-5 h-5" />
+                        </div>
+                      )}
                       <div>
-                        <p className="font-semibold text-gray-900">{int.role} Prep</p>
-                        <p className="text-sm text-gray-500">{int.questions.length} Questions • {new Date(int.createdAt).toLocaleDateString()}</p>
+                        <p className="font-semibold text-gray-900">
+                          {int.isCompanySpecific ? `${int.company} Mock Interview` : `${int.role} Prep`}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {int.questions.length} Questions • {new Date(int.createdAt).toLocaleDateString()}
+                          {int.isCompanySpecific && (
+                            <span className="ml-2 text-[10px] font-bold text-brand bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                              Enterprise Mode
+                            </span>
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => setSelectedResult({ type: 'interview', data: int })}
-                      className="text-indigo-600 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform"
-                    >
-                      Details <ArrowUpRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-6">
+                      {int.overallScore > 0 && (
+                        <div className="text-right">
+                          <span className="text-lg font-bold text-indigo-600">{int.overallScore}%</span>
+                          <span className="text-[10px] text-gray-400 block uppercase tracking-wider font-bold text-right">SCORE</span>
+                        </div>
+                      )}
+                      <button 
+                        onClick={() => setSelectedResult({ type: 'interview', data: int })}
+                        className="text-indigo-600 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                      >
+                        Details <ArrowUpRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="p-12 text-center text-gray-400">
                 <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                <p>No activity yet. Start by uploading your resume!</p>
+                <p>No activity yet. Start by uploading your resume or targeting complex company tracks!</p>
               </div>
             )}
           </div>
@@ -302,16 +322,96 @@ const Dashboard = () => {
                 <Zap className="w-4 h-4" /> Hero Tip
               </p>
               <p className="text-xs text-yellow-700 mt-2 leading-relaxed">
-                Use quantifiable metrics (e.g. "Increased sales by 20%") in your job descriptions for a higher ATS score.
+                Unlock "Company-Specific Mode" under Mock Interviews to tailor metrics directly for elite companies like Google, Amazon, or Accenture!
               </p>
             </div>
 
             <Link 
-              to="/resume" 
+              to="/interview" 
               className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all shadow-lg shadow-gray-200"
             >
-              Get More Insights
+              Start Company Prep Now
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Enterprise Milestones & Interview Metrics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Company-Wise Progress Tracking */}
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full" /> Companywise Milestones
+            </h3>
+            <p className="text-sm text-gray-400 mt-1">Enterprise-tailored mock interview performance tracking</p>
+          </div>
+
+          <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+            {data?.companyWiseProgress && data.companyWiseProgress.length > 0 ? (
+              data.companyWiseProgress.map((item: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-gray-50/50 hover:bg-gray-50 border border-gray-100 rounded-2xl transition-all">
+                  <div className="flex items-center gap-3">
+                    <CompanyLogoBadge company={item.company} size="sm" />
+                    <div>
+                      <p className="font-bold text-gray-800 text-sm">{item.company} Practice</p>
+                      <p className="text-xs text-gray-400">{item.count} mock sessions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="px-2.5 py-1 bg-indigo-50 text-[10px] font-bold text-brand uppercase tracking-wider rounded-lg border border-indigo-100">
+                      Active
+                    </span>
+                    <div className="text-right">
+                      <span className={cn(
+                        "text-lg font-black",
+                        item.avgScore >= 80 ? "text-green-600" : item.avgScore >= 50 ? "text-indigo-600" : "text-gray-500"
+                      )}>{item.avgScore || 0}%</span>
+                      <span className="text-[9px] text-gray-400 block font-bold tracking-widest leading-none">AVG SCORE</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-400">
+                <p className="text-sm">No corporate interview sessions listed. Start training today!</p>
+                <Link to="/interview" className="text-xs font-bold text-indigo-600 mt-2 block hover:underline">Launch Enterprise Prep Session →</Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Round Performance Breakdown stats */}
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm space-y-6">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-green-500 rounded-full" /> Interview Performance Stats
+            </h3>
+            <p className="text-sm text-gray-400 mt-1">Average confidence level percentages by category rounds</p>
+          </div>
+
+          <div className="space-y-5">
+            {data?.performances && data.performances.length > 0 ? (
+              data.performances.map((perf: any, idx: number) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-gray-700">{perf.category} Round</span>
+                    <span className="text-gray-900 font-bold">{perf.avgScore}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-indigo-600 rounded-full transition-all duration-500" 
+                      style={{ width: `${perf.avgScore}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-400 space-y-2">
+                <p className="text-sm">Generate metrics by completing questions inside your interview prep!</p>
+                <Link to="/interview" className="text-xs font-bold text-brand block hover:underline">Get started with standard or company mock rounds</Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -362,11 +462,106 @@ const Dashboard = () => {
   );
 };
 
+export const CompanyLogoBadge = ({ company, size = 'md' }: { company: string, size?: 'sm' | 'md' }) => {
+  const sizeClasses = size === 'sm' ? 'w-10 h-10 text-xs rounded-xl' : 'w-12 h-12 text-sm rounded-2xl';
+  
+  if (company === 'Google') {
+    return (
+      <div className={`flex items-center justify-center bg-gray-50 border border-gray-100 font-black tracking-tight shrink-0 select-none ${sizeClasses}`}>
+        <span className="text-blue-500">G</span>
+        <span className="text-red-500">o</span>
+        <span className="text-yellow-500">o</span>
+        <span className="text-blue-500">g</span>
+        <span className="text-green-500">l</span>
+        <span className="text-red-500">e</span>
+      </div>
+    );
+  }
+  
+  if (company === 'Amazon') {
+    return (
+      <div className={`flex flex-col items-center justify-center bg-slate-900 border border-slate-800 font-black text-white shrink-0 select-none ${sizeClasses}`}>
+        <span className="text-[10px] leading-none mb-0.5 tracking-tighter">amzn</span>
+        <span className="text-amber-500 text-[8px] font-bold leading-none -mt-1 font-sans">➔</span>
+      </div>
+    );
+  }
+  
+  if (company === 'Microsoft') {
+    return (
+      <div className={`flex items-center justify-center bg-gray-50 border border-gray-100 gap-1 p-1 shrink-0 select-none ${sizeClasses}`}>
+        <div className="grid grid-cols-2 gap-[2px]">
+          <div className="w-[6px] h-[6px] bg-[#f25022]"></div>
+          <div className="w-[6px] h-[6px] bg-[#7fba00]"></div>
+          <div className="w-[6px] h-[6px] bg-[#00a4ef]"></div>
+          <div className="w-[6px] h-[6px] bg-[#ffb900]"></div>
+        </div>
+        <span className="text-[9px] font-bold text-gray-700 uppercase tracking-tighter hidden md:block">MS</span>
+      </div>
+    );
+  }
+
+  if (company === 'TCS') {
+    return (
+      <div className={`flex items-center justify-center bg-gradient-to-br from-blue-700 to-blue-900 border border-blue-800 text-white font-extrabold tracking-tighter shrink-0 select-none ${sizeClasses}`}>
+        TCS
+      </div>
+    );
+  }
+
+  if (company === 'Infosys') {
+    return (
+      <div className={`flex items-center justify-center bg-indigo-600 border border-indigo-500 text-white font-black italic tracking-tighter shrink-0 select-none ${sizeClasses}`}>
+        Infy
+      </div>
+    );
+  }
+
+  if (company === 'Deloitte') {
+    return (
+      <div className={`flex items-center justify-center bg-black border border-neutral-800 text-white font-bold relative shrink-0 select-none ${sizeClasses}`}>
+        D<span className="text-green-500 font-extrabold translate-y-1.5 -ml-0.5">.</span>
+      </div>
+    );
+  }
+
+  if (company === 'Accenture') {
+    return (
+      <div className={`flex items-center justify-center bg-violet-700 border border-violet-600 text-white font-black shrink-0 select-none ${sizeClasses}`}>
+        ac<span className="text-amber-400 font-extrabold ml-0.5">&gt;</span>
+      </div>
+    );
+  }
+
+  if (company === 'Flipkart') {
+    return (
+      <div className={`flex items-center justify-center bg-yellow-400 border border-yellow-300 text-blue-800 font-extrabold shrink-0 select-none ${sizeClasses}`}>
+        F<span className="text-amber-600 font-serif font-black italic">#</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center justify-center bg-indigo-50 text-indigo-600 font-bold border border-indigo-100 shrink-0 select-none ${sizeClasses}`}>
+      {company ? company.substring(0, 2).toUpperCase() : 'CO'}
+    </div>
+  );
+};
+
 const ResumeResultView = ({ analysis }: { analysis: any }) => {
-  const { atsScore, analysis: resAnalysis, filename } = analysis;
+  const { atsScore, analysis: resAnalysis, filename, isFallback } = analysis;
 
   return (
     <div className="space-y-8">
+      {isFallback && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-2xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600" />
+          <div className="text-xs">
+            <p className="font-bold">AI Fallback Analysis</p>
+            <p className="opacity-80 leading-relaxed text-[10px]">This report was generated using our fallback system because the main AI was unavailable at the time of processing.</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between pb-6 border-b border-gray-50">
         <div>
           <p className="text-sm font-bold text-indigo-600 mb-1 uppercase tracking-wider">File Analyzed</p>
@@ -389,10 +584,19 @@ const ResumeResultView = ({ analysis }: { analysis: any }) => {
 };
 
 const JDMatchResultView = ({ match }: { match: any }) => {
-  const { matchScore, matchingSkills, missingSkills, atsKeywords, suggestions, hiringProbability, jobTitle, uploadedResumeName } = match;
+  const { matchScore, matchingSkills, missingSkills, atsKeywords, suggestions, hiringProbability, jobTitle, uploadedResumeName, isFallback } = match;
 
   return (
     <div className="space-y-8">
+      {isFallback && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-2xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600" />
+          <div className="text-xs">
+            <p className="font-bold">AI Fallback Match</p>
+            <p className="opacity-80 leading-relaxed text-[10px]">This match was calculated using our fallback system because the main AI was unavailable at the time of processing.</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between pb-6 border-b border-gray-50">
         <div>
           <p className="text-sm font-bold text-indigo-600 mb-1 uppercase tracking-wider">Job Match Analysis</p>
@@ -429,21 +633,75 @@ const JDMatchResultView = ({ match }: { match: any }) => {
 const InterviewResultView = ({ session }: { session: any }) => {
   return (
     <div className="space-y-6">
-      <div className="pb-6 border-b border-gray-50">
-        <p className="text-sm font-bold text-indigo-600 mb-1 uppercase tracking-wider">Mock Interview</p>
-        <h4 className="text-2xl font-bold text-gray-900">{session.role} Role</h4>
-        <p className="text-gray-500 mt-1">{session.questions.length} questions prepared on {new Date(session.createdAt).toLocaleDateString()}</p>
+      <div className="pb-6 border-b border-gray-50 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold text-indigo-600 mb-1 uppercase tracking-wider">
+            {session.isCompanySpecific ? `${session.company} Mock Interview` : 'Mock Interview'}
+          </p>
+          <h4 className="text-xl font-bold text-gray-900">{session.role} Role</h4>
+          <p className="text-gray-500 text-xs mt-1">
+            {session.questions.length} questions • Created {new Date(session.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+        {session.isCompanySpecific ? (
+          <div className="flex items-center gap-3">
+            {session.overallScore > 0 && (
+              <div className="text-right">
+                <span className="text-2xl font-black text-indigo-600 leading-none">{session.overallScore}%</span>
+                <span className="text-[9px] text-gray-400 block font-bold mt-0.5">OVERALL</span>
+              </div>
+            )}
+            <CompanyLogoBadge company={session.company} />
+          </div>
+        ) : (
+          session.overallScore > 0 && (
+            <div className="text-right">
+              <span className="text-2xl font-black text-indigo-600 leading-none">{session.overallScore}%</span>
+              <span className="text-[9px] text-gray-400 block font-bold mt-0.5">OVERALL</span>
+            </div>
+          )
+        )}
       </div>
       
-      <div className="space-y-4">
-        <h5 className="font-bold text-gray-900">Questions List:</h5>
-        {session.questions.map((q: any, i: number) => (
-          <div key={i} className="p-4 bg-gray-50 rounded-2xl flex gap-4 text-sm text-gray-700 border border-gray-100">
-            <span className="font-bold text-indigo-600">Q{i+1}</span>
-            {q.text}
-          </div>
-        ))}
-      </div>
+      {session.feedback && session.feedback.length > 0 ? (
+        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+          <p className="font-bold text-gray-800 text-sm">Evaluated Session Rounds:</p>
+          {session.feedback.map((item: any, i: number) => {
+            const questionObj = session.questions.find((q: any) => q._id?.toString() === item.questionId || q.id === item.questionId);
+            return (
+              <div key={i} className="bg-gray-50 p-4 border border-gray-100 rounded-2xl space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-[9px] font-bold bg-indigo-50 border border-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {questionObj?.category || 'Round'}
+                    </span>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{questionObj?.text || 'Question'}</p>
+                  </div>
+                  <span className="text-xs shrink-0 bg-white border border-gray-100 font-extrabold text-brand px-2 py-1 rounded-xl">
+                    {item.evaluation?.confidenceScore || 7}/10
+                  </span>
+                </div>
+                <div className="bg-white/80 border border-gray-100 p-3 rounded-xl text-xs space-y-2">
+                  <p className="text-gray-500 font-semibold uppercase tracking-wider text-[10px]">Your Answer:</p>
+                  <p className="text-gray-700 italic">"{item.answer}"</p>
+                  <p className="text-gray-500 font-semibold uppercase tracking-wider text-[10px] mt-2">AI Feedback:</p>
+                  <p className="text-gray-600 leading-relaxed">{item.evaluation?.overallFeedback}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <h5 className="font-bold text-gray-950 text-sm">Questions List:</h5>
+          {session.questions.map((q: any, i: number) => (
+            <div key={i} className="p-4 bg-gray-50 rounded-2xl flex gap-4 text-xs text-gray-700 border border-gray-100">
+              <span className="font-bold text-indigo-600">Q{i+1}</span>
+              {q.text}
+            </div>
+          ))}
+        </div>
+      )}
 
       <Link 
         to="/interview" 

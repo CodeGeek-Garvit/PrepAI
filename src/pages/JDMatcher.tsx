@@ -74,7 +74,7 @@ const JDMatcher = () => {
   const renderResult = () => {
     if (!result) return null;
 
-    const { matchScore, matchingSkills, missingSkills, atsKeywords, suggestions, hiringProbability, jobTitle } = result;
+    const { matchScore, matchingSkills, missingSkills, atsKeywords, suggestions, hiringProbability, jobTitle, isFallback } = result;
 
     return (
       <motion.div
@@ -82,6 +82,16 @@ const JDMatcher = () => {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-8"
       >
+        {isFallback && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-6 rounded-[2rem] flex items-center gap-4">
+            <AlertCircle className="w-6 h-6 text-yellow-600" />
+            <div className="text-sm">
+              <p className="font-bold text-lg">AI Service Busy</p>
+              <p className="opacity-80">We're using an intelligent fallback engine to provide matching results while the main AI recovers.</p>
+            </div>
+          </div>
+        )}
+
         {/* Score Card */}
         <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl overflow-hidden">
           <div className="bg-indigo-600 p-8 md:p-12 text-white">
